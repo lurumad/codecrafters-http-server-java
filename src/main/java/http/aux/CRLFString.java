@@ -1,3 +1,5 @@
+package http.aux;
+
 public class CRLFString {
     private final String source;
 

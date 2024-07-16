@@ -1,10 +1,10 @@
 # Task: Respond to an HTTP Request with a 200 Response
 
 ## Overview
-In this stage, your server will respond to an HTTP request with a 200 response. An HTTP response is made up of three parts, each separated by a CRLFString (`\r\n`):
+In this stage, your server will respond to an HTTP request with a 200 response. An HTTP response is made up of three parts, each separated by a http.aux.CRLFString (`\r\n`):
 
 1. Status line.
-2. Zero or more headers, each ending with a CRLFString.
+2. Zero or more headers, each ending with a http.aux.CRLFString.
 3. Optional response body.
 
 In this stage, your server's response will only contain a status line.
@@ -23,11 +23,11 @@ HTTP/1.1 200 OK\r\n\r\n
   - `HTTP/1.1`  - HTTP version
   - `200`       - Status code
   - `OK`        - Optional reason phrase
-  - `\r\n`      - CRLFString that marks the end of the status line
+  - `\r\n`      - http.aux.CRLFString that marks the end of the status line
 
 - **Headers:**
   - (empty)
-  - `\r\n`      - CRLFString that marks the end of the headers
+  - `\r\n`      - http.aux.CRLFString that marks the end of the headers
 
 - **Response body:**
   - (empty)

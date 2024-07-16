@@ -1,3 +1,7 @@
+package http;
+
+import http.aux.CRLFString;
+
 public class HttpResponse {
     private final HttpVersion httpVersion;
     private final HttpStatus status;
@@ -11,11 +15,11 @@ public class HttpResponse {
         return new HttpResponse(HttpVersion.HTTP_1_1, HttpStatus.OK);
     }
 
-    public HttpStatus getStatus() {
-        return status;
+    public static HttpResponse notFound() {
+        return new HttpResponse(HttpVersion.HTTP_1_1, HttpStatus.NOT_FOUND);
     }
 
-    public HttpVersion getHttpVersion() {
-        return httpVersion;
+    public String toString() {
+        return new CRLFString(new CRLFString(httpVersion + " " + status).toString()).toString();
     }
 }
