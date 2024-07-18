@@ -1,11 +1,12 @@
 package client;
 
 import http.HttpRequest;
-import http.HttpResponse;
 import http.aux.CRLFString;
 import middleware.Middleware;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.Objects;
 
@@ -23,7 +24,7 @@ public class ClientHandler extends Thread {
             var request = HttpRequest.parse(readHttpRequest(input));
             try (var output = socket.getOutputStream()) {
                 var response = middleware.handle(request);
-                output.write(response.toString().getBytes());
+                response.write(output);
             }
         } catch (Exception ex) {
             System.out.println("client.ClientHandler exception: " + ex.getMessage());

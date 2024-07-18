@@ -1,6 +1,7 @@
 package server;
 
 import client.ClientHandler;
+import middleware.EchoMiddleware;
 import middleware.Middleware;
 import middleware.RootMiddleware;
 
@@ -17,7 +18,8 @@ public class HttpServer {
 
     public void start() {
         var middleware = Middleware.link(
-            new RootMiddleware()
+                new RootMiddleware(),
+                new EchoMiddleware()
         );
 
         try (ServerSocket serverSocket = new ServerSocket(this.port)) {
