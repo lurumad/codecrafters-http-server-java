@@ -1,27 +1,29 @@
 package server;
 
 import client.ClientHandler;
-import middleware.EchoMiddleware;
-import middleware.Middleware;
-import middleware.RootMiddleware;
-import middleware.UserAgentMiddleware;
+import files.PhysicalFileProvider;
+import middleware.*;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.Path;
 
 public class HttpServer {
     private final int port;
+    private final Path root;
 
-    public HttpServer(int port) {
+    public HttpServer(int port, Path root) {
         this.port = port;
+        this.root = root;
     }
 
     public void start() {
         var middleware = Middleware.link(
                 new RootMiddleware(),
                 new EchoMiddleware(),
-                new UserAgentMiddleware()
+                new UserAgentMiddleware(),
+                new FileMiddleware(new PhysicalFileProvider(root))
         );
 
         try (ServerSocket serverSocket = new ServerSocket(this.port)) {
