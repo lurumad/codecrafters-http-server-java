@@ -4,6 +4,7 @@ import http.HttpRequest;
 import middleware.EchoMiddleware;
 import middleware.Middleware;
 import middleware.RootMiddleware;
+import middleware.UserAgentMiddleware;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -47,5 +48,18 @@ public class MiddlewareTest {
         var outputStream = new ByteArrayOutputStream();
         response.write(outputStream);
         assertEquals("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 3\r\n\r\nabc", outputStream.toString());
+    }
+
+    @Test
+    public void handle_user_agent_header() throws IOException {
+        var middleware = Middleware.link(
+            new RootMiddleware(),
+            new UserAgentMiddleware()
+        );
+        var request = HttpRequest.parse("GET /user-agent HTTP/1.1\r\nHost: localhost:4221\r\nUser-Agent: foobar/1.2.3\r\nAccept: */*\r\n\r\n");
+        var response = middleware.handle(request);
+        var outputStream = new ByteArrayOutputStream();
+        response.write(outputStream);
+        assertEquals("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 12\r\n\r\nfoobar/1.2.3", outputStream.toString());
     }
 }

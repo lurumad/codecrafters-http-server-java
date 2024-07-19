@@ -4,6 +4,7 @@ import client.ClientHandler;
 import middleware.EchoMiddleware;
 import middleware.Middleware;
 import middleware.RootMiddleware;
+import middleware.UserAgentMiddleware;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -19,7 +20,8 @@ public class HttpServer {
     public void start() {
         var middleware = Middleware.link(
                 new RootMiddleware(),
-                new EchoMiddleware()
+                new EchoMiddleware(),
+                new UserAgentMiddleware()
         );
 
         try (ServerSocket serverSocket = new ServerSocket(this.port)) {
