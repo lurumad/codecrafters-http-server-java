@@ -1,5 +1,6 @@
 package files;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -24,6 +25,16 @@ public class PhysicalFileProvider implements FileProvider {
             return Optional.of(Files.readString(directoryForFiles));
         } catch (Exception e) {
             return Optional.empty();
+        }
+    }
+
+    @Override
+    public void write(String path, String body) {
+        var directoryForFiles = Paths.get(root.toString(), path);
+        try {
+            Files.writeString(directoryForFiles, body);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 }

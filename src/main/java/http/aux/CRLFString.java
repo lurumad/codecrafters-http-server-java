@@ -7,6 +7,10 @@ public class CRLFString {
         this.source = source;
     }
 
+    public CRLFString() {
+        this.source = "";
+    }
+
     @Override
     public String toString() {
         return String.format("%s\r\n", source);

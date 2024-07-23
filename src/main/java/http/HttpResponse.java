@@ -26,6 +26,10 @@ public class HttpResponse {
         return new HttpResponse(HttpVersion.HTTP_1_1, HttpStatus.NOT_FOUND);
     }
 
+    public static HttpResponse created() {
+        return new HttpResponse(HttpVersion.HTTP_1_1, HttpStatus.CREATED);
+    }
+
     public void addHeader(String key, String value) {
         headers.put(key, value);
     }

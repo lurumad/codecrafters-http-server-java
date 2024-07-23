@@ -10,17 +10,19 @@ public class HttpRequest {
     private final HttpMethod method;
     private final String path;
     private final HttpVersion version;
+    private final String body;
     private final Map<String, String> headers = new LinkedHashMap<>();
 
     private HttpRequest(
             HttpMethod method,
             String path,
             HttpVersion version,
-            Map<String, String> headers
-    ) {
+            Map<String, String> headers,
+            String body) {
         this.method = method;
         this.path = path;
         this.version = version;
+        this.body = body;
         this.headers.putAll(headers);
     }
 
@@ -28,23 +30,23 @@ public class HttpRequest {
         try (var reader = new BufferedReader(new java.io.StringReader(data))) {
             var requestLine = requestLine(reader);
             var headers = headers(reader);
-            body(reader);
+            var body = body(reader);
 
-            return new HttpRequest(requestLine.method(), requestLine.path(), requestLine.version(), headers);
+            return new HttpRequest(requestLine.method(), requestLine.path(), requestLine.version(), headers, body);
 
         } catch (Exception ex) {
             throw new RuntimeException("Failed to parse request: " + ex.getMessage());
         }
     }
 
-    private static void body(BufferedReader reader) throws IOException {
+    private static String body(BufferedReader reader) throws IOException {
         String line;
 
         var bodyBuilder = new StringBuilder();
         while ((line = reader.readLine()) != null) {
             bodyBuilder.append(line);
         }
-        var body = bodyBuilder.toString();
+        return bodyBuilder.toString();
     }
 
     private static LinkedHashMap<String, String> headers(BufferedReader reader) throws IOException {
@@ -82,5 +84,9 @@ public class HttpRequest {
 
     public String getHeader(String header) {
         return headers.get(header);
+    }
+
+    public String getBody() {
+        return body;
     }
 }

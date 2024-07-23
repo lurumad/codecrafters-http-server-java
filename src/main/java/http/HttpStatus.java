@@ -1,7 +1,7 @@
 package http;
 
 public enum HttpStatus {
-    OK(200, "OK"), NOT_FOUND(404, "Not Found");
+    OK(200, "OK"), NOT_FOUND(404, "Not Found"), CREATED(201, "Created");
 
     private final int code;
     private final String reason;

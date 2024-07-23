@@ -4,6 +4,7 @@ import files.FileProvider;
 import http.HttpRequest;
 import http.HttpResponse;
 
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class FileMiddleware extends Middleware {
@@ -19,21 +20,34 @@ public class FileMiddleware extends Middleware {
     public HttpResponse handle(HttpRequest request) {
         var matcher = compiledPattern.matcher(request.getPath());
 
-        if (matcher.matches()) {
-            var value = matcher.group(1);
-            var file = fileProvider.read(value);
-
-            if (file.isEmpty()) {
-                return HttpResponse.notFound();
-            }
-
-            var response = HttpResponse.ok();
-            response.addHeader("Content-Type", "application/octet-stream");
-            response.addHeader("Content-Length", Integer.toString(file.get().length()));
-            response.body(file.get());
-            return response;
+        if (!matcher.matches()) {
+            return handleNext(request);
         }
 
-        return handleNext(request);
+        return switch (request.getMethod()) {
+            case GET -> readFile(matcher);
+            case POST -> writeToFile(request, matcher);
+        };
+    }
+
+    private HttpResponse writeToFile(HttpRequest request, Matcher matcher) {
+        var value = matcher.group(1);
+        fileProvider.write(value, request.getBody());
+        return HttpResponse.created();
+    }
+
+    private HttpResponse readFile(Matcher matcher) {
+        var value = matcher.group(1);
+        var file = fileProvider.read(value);
+
+        if (file.isEmpty()) {
+            return HttpResponse.notFound();
+        }
+
+        var response = HttpResponse.ok();
+        response.addHeader("Content-Type", "application/octet-stream");
+        response.addHeader("Content-Length", Integer.toString(file.get().length()));
+        response.body(file.get());
+        return response;
     }
 }

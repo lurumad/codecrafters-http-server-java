@@ -1,6 +1,6 @@
 package middlewares;
 
-import files.PhysicalFileProvider;
+import files.FileProvider;
 import files.ResourcesFileProvider;
 import http.HttpRequest;
 import middleware.*;
@@ -10,6 +10,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
 
 public class MiddlewareTest {
     @Test
@@ -75,6 +76,7 @@ public class MiddlewareTest {
         assertEquals("HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: 13\r\n\r\nHello, World!", outputStream.toString());
     }
 
+    @Test
     public void returns_not_found_when_a_file_not_exists() throws IOException {
         var middleware = Middleware.link(
                 new RootMiddleware(),
@@ -84,6 +86,21 @@ public class MiddlewareTest {
         var response = middleware.handle(request);
         var outputStream = new ByteArrayOutputStream();
         response.write(outputStream);
-        assertEquals("HTTP/1.1 404 Not Found\\r\\n\\r\\n", outputStream.toString());
+        assertEquals("HTTP/1.1 404 Not Found\r\n\r\n", outputStream.toString());
+    }
+
+    @Test
+    public void creates_a_new_file_when_post_request() throws IOException {
+        var fileProvider = mock(FileProvider.class);;
+        var middleware = Middleware.link(
+            new RootMiddleware(),
+            new FileMiddleware(fileProvider)
+        );
+        var request = HttpRequest.parse("POST /files/number HTTP/1.1\r\nHost: localhost:4221\r\nUser-Agent: curl/7.64.1\r\nAccept: */*\r\nContent-Type: application/octet-stream\r\nContent-Length: 5\r\n\r\n12345\n");
+        var response = middleware.handle(request);
+        var outputStream = new ByteArrayOutputStream();
+        response.write(outputStream);
+        assertEquals("HTTP/1.1 201 Created\r\n\r\n", outputStream.toString());
+        verify(fileProvider).write("number", "12345");
     }
 }

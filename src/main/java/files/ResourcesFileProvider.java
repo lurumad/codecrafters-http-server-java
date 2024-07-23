@@ -15,4 +15,9 @@ public class ResourcesFileProvider implements FileProvider {
             return Optional.empty();
         }
     }
+
+    @Override
+    public void write(String path, String body) {
+        throw new UnsupportedOperationException("Cannot write to resources");
+    }
 }

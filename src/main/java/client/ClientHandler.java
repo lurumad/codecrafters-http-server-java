@@ -3,7 +3,6 @@ package client;
 import http.HttpRequest;
 import http.aux.CRLFString;
 import middleware.Middleware;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -33,10 +32,24 @@ public class ClientHandler extends Thread {
 
     private String readHttpRequest(BufferedReader input) throws IOException {
         String line;
+        Integer contentLength = null;
         var lines = new StringBuilder();
-        while (!Objects.equals(line = input.readLine(), "")) {
+        while (!Objects.equals(line = input.readLine(), "") && !line.isEmpty()) {
             lines.append(new CRLFString(line));
+
+            if (line.toLowerCase().startsWith("content-length")) {
+                contentLength = Integer.parseInt(line.split(":")[1].trim());
+            }
         }
+
+        lines.append(new CRLFString());
+
+        if (contentLength != null) {
+            var body = new char[contentLength];
+            input.read(body, 0, contentLength);
+            lines.append(body);
+        }
+
         return lines.toString();
     }
 }
