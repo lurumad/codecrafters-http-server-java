@@ -1,5 +1,6 @@
 package middleware;
 
+import http.HttpHeaders;
 import http.HttpRequest;
 import http.HttpResponse;
 
@@ -16,8 +17,8 @@ public class EchoMiddleware extends Middleware {
         if (matcher.matches()) {
             var value = matcher.group(1);
             var response = HttpResponse.ok();
-            response.addHeader("Content-Type", "text/plain");
-            response.addHeader("Content-Length", Integer.toString(value.length()));
+            response.addHeader(HttpHeaders.CONTENT_TYPE, "text/plain");
+            response.addHeader(HttpHeaders.CONTENT_LENGTH, Integer.toString(value.length()));
             response.body(value);
             return response;
         }

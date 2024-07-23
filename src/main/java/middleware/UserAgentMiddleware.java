@@ -1,5 +1,6 @@
 package middleware;
 
+import http.HttpHeaders;
 import http.HttpRequest;
 import http.HttpResponse;
 
@@ -8,9 +9,12 @@ public class UserAgentMiddleware extends Middleware {
     public HttpResponse handle(HttpRequest request) {
         if (request.getPath().equals("/user-agent")) {
             var response = HttpResponse.ok();
-            response.addHeader("Content-Type", "text/plain");
-            response.addHeader("Content-Length", Integer.toString(request.getHeaders().get("User-Agent").length()));
-            response.body(request.getHeaders().get("User-Agent"));
+            response.addHeader(HttpHeaders.CONTENT_TYPE, "text/plain");
+            response.addHeader(
+                    HttpHeaders.CONTENT_LENGTH,
+                    Integer.toString(request.getHeaders().get(HttpHeaders.USER_AGENT).length())
+            );
+            response.body(request.getHeaders().get(HttpHeaders.USER_AGENT));
             return response;
         }
 

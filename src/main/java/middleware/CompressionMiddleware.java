@@ -1,13 +1,12 @@
 package middleware;
 
+import http.HttpHeaders;
 import http.HttpRequest;
 import http.HttpResponse;
 
 import java.util.Set;
 
 public class CompressionMiddleware extends Middleware {
-    private static final Set<String> AVAILABLE_ENCODINGS = Set.of("gzip");
-
     @Override
     public HttpResponse handle(HttpRequest request) {
         var response = handleNext(request);
@@ -16,9 +15,11 @@ public class CompressionMiddleware extends Middleware {
             return response;
         }
 
-        if (request.getHeaders().containsKey("Accept-Encoding") &&
-                AVAILABLE_ENCODINGS.contains(request.getHeaders().get("Accept-Encoding"))) {
-            response.addHeader("Content-Encoding", request.getHeaders().get("Accept-Encoding"));
+        if (request.getHeaders().containsKey(HttpHeaders.ACCEPT_ENCODING)) {
+            var encodings = request.getHeaders().get(HttpHeaders.ACCEPT_ENCODING).split(",\\s*");
+            if (Set.of(encodings).contains("gzip")) {
+                response.addHeader(HttpHeaders.CONTENT_ENCODING, "gzip");
+            }
         }
 
         return response;
