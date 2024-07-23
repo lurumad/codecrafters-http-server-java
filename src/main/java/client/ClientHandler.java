@@ -3,6 +3,7 @@ package client;
 import http.HttpRequest;
 import http.aux.CRLFString;
 import middleware.Middleware;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;

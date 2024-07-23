@@ -9,8 +9,8 @@ public class UserAgentMiddleware extends Middleware {
         if (request.getPath().equals("/user-agent")) {
             var response = HttpResponse.ok();
             response.addHeader("Content-Type", "text/plain");
-            response.addHeader("Content-Length", Integer.toString(request.getHeader("User-Agent").length()));
-            response.body(request.getHeader("User-Agent"));
+            response.addHeader("Content-Length", Integer.toString(request.getHeaders().get("User-Agent").length()));
+            response.body(request.getHeaders().get("User-Agent"));
             return response;
         }
 

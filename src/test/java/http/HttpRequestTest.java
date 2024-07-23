@@ -11,6 +11,6 @@ public class HttpRequestTest {
         assertEquals(HttpMethod.GET, request.getMethod());
         assertEquals("/index.html", request.getPath());
         assertEquals(HttpVersion.HTTP_1_1, request.getVersion());
-        assertEquals("curl/7.64.1", request.getHeader("User-Agent"));
+        assertEquals("curl/7.64.1", request.getHeaders().get("User-Agent"));
     }
 }

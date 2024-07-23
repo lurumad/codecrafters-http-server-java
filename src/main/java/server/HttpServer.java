@@ -20,6 +20,7 @@ public class HttpServer {
 
     public void start() {
         var middleware = Middleware.link(
+                new CompressionMiddleware(),
                 new RootMiddleware(),
                 new EchoMiddleware(),
                 new UserAgentMiddleware(),

@@ -1,6 +1,7 @@
 package middlewares;
 
 import files.FileProvider;
+import files.PhysicalFileProvider;
 import files.ResourcesFileProvider;
 import http.HttpRequest;
 import middleware.*;
@@ -23,18 +24,6 @@ public class MiddlewareTest {
         var outputStream = new ByteArrayOutputStream();
         response.write(outputStream);
         assertEquals("HTTP/1.1 200 OK\r\n\r\n", outputStream.toString());
-    }
-
-    @Test
-    public void respond_with_not_found() throws IOException {
-        var middleware = Middleware.link(
-            new RootMiddleware()
-        );
-        var request = HttpRequest.parse("GET /not-found HTTP/1.1\r\nHost: localhost:4221\r\nUser-Agent: curl/7.64.1\r\nAccept: */*\r\n\r\n");
-        var response = middleware.handle(request);
-        var outputStream = new ByteArrayOutputStream();
-        response.write(outputStream);
-        assertEquals("HTTP/1.1 404 Not Found\r\n\r\n", outputStream.toString());
     }
 
     @Test
@@ -102,5 +91,34 @@ public class MiddlewareTest {
         response.write(outputStream);
         assertEquals("HTTP/1.1 201 Created\r\n\r\n", outputStream.toString());
         verify(fileProvider).write("number", "12345");
+    }
+
+    @Test
+    public void respond_with_not_found() throws IOException {
+        var middleware = Middleware.link(
+                new RootMiddleware(),
+                new EchoMiddleware(),
+                new UserAgentMiddleware(),
+                new FileMiddleware(new ResourcesFileProvider())
+        );
+        var request = HttpRequest.parse("GET /not-found HTTP/1.1\r\nHost: localhost:4221\r\nUser-Agent: curl/7.64.1\r\nAccept: */*\r\n\r\n");
+        var response = middleware.handle(request);
+        var outputStream = new ByteArrayOutputStream();
+        response.write(outputStream);
+        assertEquals("HTTP/1.1 404 Not Found\r\n\r\n", outputStream.toString());
+    }
+
+    @Test
+    public void respond_with_with_the_compressed_body() throws IOException {
+        var middleware = Middleware.link(
+                new CompressionMiddleware(),
+                new RootMiddleware(),
+                new EchoMiddleware()
+        );
+        var request = HttpRequest.parse("GET /echo/abc HTTP/1.1\r\nHost: localhost:4221\r\nUser-Agent: curl/7.64.1\r\nAccept: */*\r\nAccept-Encoding: gzip\r\n\r\n");
+        var response = middleware.handle(request);
+        var outputStream = new ByteArrayOutputStream();
+        response.write(outputStream);
+        assertEquals("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 3\r\nContent-Encoding: gzip\r\n\r\nabc", outputStream.toString());
     }
 }

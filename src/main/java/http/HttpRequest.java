@@ -67,9 +67,6 @@ public class HttpRequest {
         return new RequestLine(method, path, version);
     }
 
-    private record RequestLine(HttpMethod method, String path, HttpVersion version) {
-    }
-
     public String getPath() {
         return path;
     }
@@ -82,11 +79,14 @@ public class HttpRequest {
         return version;
     }
 
-    public String getHeader(String header) {
-        return headers.get(header);
+    public Map<String, String> getHeaders() {
+        return headers;
     }
 
     public String getBody() {
         return body;
+    }
+
+    private record RequestLine(HttpMethod method, String path, HttpVersion version) {
     }
 }

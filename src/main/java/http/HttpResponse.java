@@ -47,4 +47,8 @@ public class HttpResponse {
         response.append(body);
         output.write(response.toString().getBytes());
     }
+
+    public boolean isSuccessful() {
+        return status == HttpStatus.OK || status == HttpStatus.CREATED;
+    }
 }
