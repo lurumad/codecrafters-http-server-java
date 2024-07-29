@@ -30,7 +30,7 @@ public class HttpServer {
         try (ServerSocket serverSocket = new ServerSocket(this.port)) {
             System.out.println("Server is listening on port " + port);
 
-            while (true) {
+            while (!serverSocket.isClosed()) {
                 Socket socket = serverSocket.accept();
                 new ClientHandler(socket, middleware).start();
             }

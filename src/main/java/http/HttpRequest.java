@@ -1,9 +1,12 @@
 package http;
 
+import http.aux.CRLFString;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class HttpRequest {
 
@@ -26,7 +29,30 @@ public class HttpRequest {
         this.headers.putAll(headers);
     }
 
-    public static HttpRequest parse(String data) {
+    public static HttpRequest from(BufferedReader reader) throws IOException {
+        String line;
+        Integer contentLength = null;
+        var lines = new StringBuilder();
+        while (!Objects.equals(line = reader.readLine(), "") && !line.isEmpty()) {
+            lines.append(new CRLFString(line));
+
+            if (line.toLowerCase().startsWith("content-length")) {
+                contentLength = Integer.parseInt(line.split(":")[1].trim());
+            }
+        }
+
+        lines.append(new CRLFString());
+
+        if (contentLength != null) {
+            var body = new char[contentLength];
+            reader.read(body, 0, contentLength);
+            lines.append(body);
+        }
+
+        return parse(lines.toString());
+    }
+
+    private static HttpRequest parse(String data) {
         try (var reader = new BufferedReader(new java.io.StringReader(data))) {
             var requestLine = requestLine(reader);
             var headers = headers(reader);
