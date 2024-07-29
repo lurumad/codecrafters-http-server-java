@@ -1,13 +1,9 @@
 package middlewares;
 
 import files.FileProvider;
-import files.PhysicalFileProvider;
 import files.ResourcesFileProvider;
-import http.HttpMethod;
 import http.HttpRequest;
-import http.HttpVersion;
 import middleware.*;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.BufferedReader;
@@ -129,7 +125,7 @@ public class MiddlewareTest {
 
     private HttpRequest createRequest(String content) {
         try (BufferedReader reader = new BufferedReader(new java.io.StringReader(content))) {
-            return HttpRequest.parse(reader);
+            return HttpRequest.from(reader);
         } catch (Exception ex) {
             return null;
         }

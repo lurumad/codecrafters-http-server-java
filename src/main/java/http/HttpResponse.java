@@ -37,11 +37,6 @@ public class HttpResponse {
         return new HttpResponse(HttpVersion.HTTP_1_1, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    public HttpResponse body(byte[] body) {
-        this.body = body;
-        return this;
-    }
-
     public void write(OutputStream output) throws IOException {
         output.write(new CRLFString(httpVersion + " " + status).toString().getBytes(StandardCharsets.UTF_8));
         for (var entry : headers.entrySet()) {
@@ -69,6 +64,11 @@ public class HttpResponse {
         return response
                 .contentLength(gzipData.length)
                 .body(gzipData);
+    }
+
+    public HttpResponse body(byte[] body) {
+        this.body = body;
+        return this;
     }
 
     public HttpResponse contentLength(int length) {

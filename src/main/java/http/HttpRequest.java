@@ -28,7 +28,7 @@ public class HttpRequest {
         this.headers.putAll(headers);
     }
 
-    public static HttpRequest parse(BufferedReader reader) throws IOException {
+    public static HttpRequest from(BufferedReader reader) throws IOException {
         var requestLine = requestLine(reader);
         var headers = headers(reader);
         var body = body(reader, headers);

@@ -18,7 +18,7 @@ public class ClientHandler extends Thread {
 
     public void run() {
         try (var reader = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
-            var request = HttpRequest.parse(reader);
+            var request = HttpRequest.from(reader);
             try (var output = socket.getOutputStream()) {
                 var response = middleware.handle(request);
                 response.write(output);

@@ -12,7 +12,7 @@ public class HttpRequestTest {
     @Test
     public void parse_request() {
         try (BufferedReader reader = new BufferedReader(new java.io.StringReader("GET /index.html HTTP/1.1\r\nHost: localhost:4221\r\nUser-Agent: curl/7.64.1\r\nAccept: */*\r\n\r\n"))) {
-            var request = HttpRequest.parse(reader);
+            var request = HttpRequest.from(reader);
             assertEquals(HttpMethod.GET, request.getMethod());
             assertEquals("/index.html", request.getPath());
             assertEquals(HttpVersion.HTTP_1_1, request.getVersion());
