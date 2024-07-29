@@ -18,7 +18,7 @@ public class CompressionMiddleware extends Middleware {
         if (request.getHeaders().containsKey(HttpHeaders.ACCEPT_ENCODING)) {
             var encodings = request.getHeaders().get(HttpHeaders.ACCEPT_ENCODING).split(",\\s*");
             if (Set.of(encodings).contains("gzip")) {
-                response.addHeader(HttpHeaders.CONTENT_ENCODING, "gzip");
+                return response.gzipped();
             }
         }
 

@@ -19,7 +19,7 @@ public class EchoMiddleware extends Middleware {
             var response = HttpResponse.ok();
             response.addHeader(HttpHeaders.CONTENT_TYPE, "text/plain");
             response.addHeader(HttpHeaders.CONTENT_LENGTH, Integer.toString(value.length()));
-            response.body(value);
+            response.body(value.getBytes());
             return response;
         }
 

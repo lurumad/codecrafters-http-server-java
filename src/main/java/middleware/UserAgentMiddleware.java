@@ -14,7 +14,7 @@ public class UserAgentMiddleware extends Middleware {
                     HttpHeaders.CONTENT_LENGTH,
                     Integer.toString(request.getHeaders().get(HttpHeaders.USER_AGENT).length())
             );
-            response.body(request.getHeaders().get(HttpHeaders.USER_AGENT));
+            response.body(request.getHeaders().get(HttpHeaders.USER_AGENT).getBytes());
             return response;
         }
 

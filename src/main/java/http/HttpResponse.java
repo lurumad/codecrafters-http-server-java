@@ -2,16 +2,19 @@ package http;
 
 import http.aux.CRLFString;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.zip.GZIPOutputStream;
 
 public class HttpResponse {
     private final HttpVersion httpVersion;
     private final HttpStatus status;
     private final Map<String, String> headers = new LinkedHashMap<>();
-    private String body = "";
+    private byte[] body = new byte[0];
 
     private HttpResponse(HttpVersion httpVersion, HttpStatus status) {
         this.httpVersion = httpVersion;
@@ -30,25 +33,44 @@ public class HttpResponse {
         return new HttpResponse(HttpVersion.HTTP_1_1, HttpStatus.CREATED);
     }
 
+    public static HttpResponse internalServerError() {
+        return new HttpResponse(HttpVersion.HTTP_1_1, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
     public void addHeader(String key, String value) {
         headers.put(key, value);
     }
 
-    public void body(String body) {
+    public void body(byte[] body) {
         this.body = body;
     }
 
     public void write(OutputStream output) throws IOException {
-        var response = new StringBuilder(new CRLFString(httpVersion + " " + status).toString());
+        output.write(new CRLFString(httpVersion + " " + status).toString().getBytes(StandardCharsets.UTF_8));
         for (var entry : headers.entrySet()) {
-            response.append(new CRLFString(entry.getKey() + ": " + entry.getValue()));
+            output.write(new CRLFString(entry.getKey() + ": " + entry.getValue()).toString().getBytes(StandardCharsets.UTF_8));
         }
-        response.append(new CRLFString(""));
-        response.append(body);
-        output.write(response.toString().getBytes());
+        output.write(new CRLFString("").toString().getBytes(StandardCharsets.UTF_8));
+        output.write(body);
     }
 
     public boolean isSuccessful() {
         return status == HttpStatus.OK || status == HttpStatus.CREATED;
+    }
+
+    public HttpResponse gzipped() {
+        var response = HttpResponse.ok();
+        response.addHeader(HttpHeaders.CONTENT_TYPE, "plain/text");
+        response.addHeader(HttpHeaders.CONTENT_ENCODING, "gzip");
+        var bytesStream = new ByteArrayOutputStream();
+        try (GZIPOutputStream gzipOutputStream = new GZIPOutputStream(bytesStream)) {
+            gzipOutputStream.write(body);
+        } catch (Exception e) {
+            return HttpResponse.internalServerError();
+        }
+        var gzipData = bytesStream.toByteArray();
+        response.addHeader(HttpHeaders.CONTENT_LENGTH, Integer.toString(gzipData.length));
+        response.body(gzipData);
+        return response;
     }
 }
