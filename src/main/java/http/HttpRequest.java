@@ -1,19 +1,18 @@
 package http;
 
-import http.aux.CRLFString;
-
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Objects;
+import java.util.Optional;
 
 public class HttpRequest {
 
     private final HttpMethod method;
     private final String path;
     private final HttpVersion version;
-    private final String body;
+    private final byte[] body;
     private final Map<String, String> headers = new LinkedHashMap<>();
 
     private HttpRequest(
@@ -21,7 +20,7 @@ public class HttpRequest {
             String path,
             HttpVersion version,
             Map<String, String> headers,
-            String body) {
+            byte[] body) {
         this.method = method;
         this.path = path;
         this.version = version;
@@ -29,50 +28,26 @@ public class HttpRequest {
         this.headers.putAll(headers);
     }
 
-    public static HttpRequest from(BufferedReader reader) throws IOException {
-        String line;
-        Integer contentLength = null;
-        var lines = new StringBuilder();
-        while (!Objects.equals(line = reader.readLine(), "") && !line.isEmpty()) {
-            lines.append(new CRLFString(line));
+    public static HttpRequest parse(BufferedReader reader) throws IOException {
+        var requestLine = requestLine(reader);
+        var headers = headers(reader);
+        var body = body(reader, headers);
 
-            if (line.toLowerCase().startsWith("content-length")) {
-                contentLength = Integer.parseInt(line.split(":")[1].trim());
-            }
-        }
-
-        lines.append(new CRLFString());
-
-        if (contentLength != null) {
-            var body = new char[contentLength];
-            reader.read(body, 0, contentLength);
-            lines.append(body);
-        }
-
-        return parse(lines.toString());
+        return new HttpRequest(
+                requestLine.method(),
+                requestLine.path(),
+                requestLine.version(),
+                headers,
+                body
+        );
     }
 
-    private static HttpRequest parse(String data) {
-        try (var reader = new BufferedReader(new java.io.StringReader(data))) {
-            var requestLine = requestLine(reader);
-            var headers = headers(reader);
-            var body = body(reader);
-
-            return new HttpRequest(requestLine.method(), requestLine.path(), requestLine.version(), headers, body);
-
-        } catch (Exception ex) {
-            throw new RuntimeException("Failed to parse request: " + ex.getMessage());
-        }
-    }
-
-    private static String body(BufferedReader reader) throws IOException {
-        String line;
-
-        var bodyBuilder = new StringBuilder();
-        while ((line = reader.readLine()) != null) {
-            bodyBuilder.append(line);
-        }
-        return bodyBuilder.toString();
+    private static RequestLine requestLine(BufferedReader reader) throws IOException {
+        var requestLine = reader.readLine().split(" ");
+        var method = HttpMethod.valueOf(requestLine[0]);
+        var path = requestLine[1];
+        var version = HttpVersion.from(requestLine[2]);
+        return new RequestLine(method, path, version);
     }
 
     private static LinkedHashMap<String, String> headers(BufferedReader reader) throws IOException {
@@ -85,12 +60,11 @@ public class HttpRequest {
         return headers;
     }
 
-    private static RequestLine requestLine(BufferedReader reader) throws IOException {
-        var requestLine = reader.readLine().split(" ");
-        var method = HttpMethod.valueOf(requestLine[0]);
-        var path = requestLine[1];
-        var version = HttpVersion.from(requestLine[2]);
-        return new RequestLine(method, path, version);
+    private static byte[] body(BufferedReader reader, LinkedHashMap<String, String> headers) throws IOException {
+        int contentLength = Integer.parseInt(headers.getOrDefault(HttpHeaders.CONTENT_LENGTH, "0"));
+        var body = new char[contentLength];
+        reader.read(body, 0, contentLength);
+        return new String(body).getBytes(StandardCharsets.UTF_8);
     }
 
     public String getPath() {
@@ -105,11 +79,11 @@ public class HttpRequest {
         return version;
     }
 
-    public Map<String, String> getHeaders() {
-        return headers;
+    public Optional<String> header(String key) {
+        return headers.containsKey(key) ? Optional.of(headers.get(key)) : Optional.empty();
     }
 
-    public String getBody() {
+    public byte[] getBody() {
         return body;
     }
 

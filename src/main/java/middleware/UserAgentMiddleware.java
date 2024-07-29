@@ -8,14 +8,11 @@ public class UserAgentMiddleware extends Middleware {
     @Override
     public HttpResponse handle(HttpRequest request) {
         if (request.getPath().equals("/user-agent")) {
-            var response = HttpResponse.ok();
-            response.addHeader(HttpHeaders.CONTENT_TYPE, "text/plain");
-            response.addHeader(
-                    HttpHeaders.CONTENT_LENGTH,
-                    Integer.toString(request.getHeaders().get(HttpHeaders.USER_AGENT).length())
-            );
-            response.body(request.getHeaders().get(HttpHeaders.USER_AGENT).getBytes());
-            return response;
+            var userAgent = request.header(HttpHeaders.USER_AGENT).orElse("");
+            return HttpResponse.ok()
+                    .contentType("text/plain")
+                    .contentLength(userAgent.length())
+                    .body(userAgent.getBytes());
         }
 
         return handleNext(request);

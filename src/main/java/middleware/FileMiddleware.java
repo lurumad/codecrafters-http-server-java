@@ -1,7 +1,6 @@
 package middleware;
 
 import files.FileProvider;
-import http.HttpHeaders;
 import http.HttpRequest;
 import http.HttpResponse;
 
@@ -45,10 +44,9 @@ public class FileMiddleware extends Middleware {
             return HttpResponse.notFound();
         }
 
-        var response = HttpResponse.ok();
-        response.addHeader(HttpHeaders.CONTENT_TYPE, "application/octet-stream");
-        response.addHeader(HttpHeaders.CONTENT_LENGTH, Integer.toString(file.get().length()));
-        response.body(file.get().getBytes());
-        return response;
+        return HttpResponse.ok()
+                .contentType("application/octet-stream")
+                .contentLength(file.get().length())
+                .body(file.get().getBytes());
     }
 }

@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -94,7 +95,7 @@ public class MiddlewareTest {
         var outputStream = new ByteArrayOutputStream();
         response.write(outputStream);
         assertEquals("HTTP/1.1 201 Created\r\n\r\n", outputStream.toString());
-        verify(fileProvider).write("number", "12345");
+        verify(fileProvider).write("number", "12345".getBytes(StandardCharsets.UTF_8));
     }
 
     @Test
@@ -128,7 +129,7 @@ public class MiddlewareTest {
 
     private HttpRequest createRequest(String content) {
         try (BufferedReader reader = new BufferedReader(new java.io.StringReader(content))) {
-            return HttpRequest.from(reader);
+            return HttpRequest.parse(reader);
         } catch (Exception ex) {
             return null;
         }

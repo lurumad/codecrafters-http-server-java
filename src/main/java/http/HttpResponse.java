@@ -37,12 +37,9 @@ public class HttpResponse {
         return new HttpResponse(HttpVersion.HTTP_1_1, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    public void addHeader(String key, String value) {
-        headers.put(key, value);
-    }
-
-    public void body(byte[] body) {
+    public HttpResponse body(byte[] body) {
         this.body = body;
+        return this;
     }
 
     public void write(OutputStream output) throws IOException {
@@ -59,9 +56,9 @@ public class HttpResponse {
     }
 
     public HttpResponse gzipped() {
-        var response = HttpResponse.ok();
-        response.addHeader(HttpHeaders.CONTENT_TYPE, "plain/text");
-        response.addHeader(HttpHeaders.CONTENT_ENCODING, "gzip");
+        var response = HttpResponse.ok()
+                .contentType("text/plain")
+                .contentEncoding("gzip");
         var bytesStream = new ByteArrayOutputStream();
         try (GZIPOutputStream gzipOutputStream = new GZIPOutputStream(bytesStream)) {
             gzipOutputStream.write(body);
@@ -69,8 +66,23 @@ public class HttpResponse {
             return HttpResponse.internalServerError();
         }
         var gzipData = bytesStream.toByteArray();
-        response.addHeader(HttpHeaders.CONTENT_LENGTH, Integer.toString(gzipData.length));
-        response.body(gzipData);
-        return response;
+        return response
+                .contentLength(gzipData.length)
+                .body(gzipData);
+    }
+
+    public HttpResponse contentLength(int length) {
+        headers.put(HttpHeaders.CONTENT_LENGTH, Integer.toString(length));
+        return this;
+    }
+
+    public HttpResponse contentEncoding(String contentEncoding) {
+        headers.put(HttpHeaders.CONTENT_ENCODING, contentEncoding);
+        return this;
+    }
+
+    public HttpResponse contentType(String contentType) {
+        headers.put(HttpHeaders.CONTENT_TYPE, contentType);
+        return this;
     }
 }

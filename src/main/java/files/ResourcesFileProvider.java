@@ -17,7 +17,7 @@ public class ResourcesFileProvider implements FileProvider {
     }
 
     @Override
-    public void write(String path, String body) {
+    public void write(String path, byte[] body) {
         throw new UnsupportedOperationException("Cannot write to resources");
     }
 }

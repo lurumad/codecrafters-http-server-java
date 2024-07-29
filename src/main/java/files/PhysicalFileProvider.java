@@ -29,10 +29,10 @@ public class PhysicalFileProvider implements FileProvider {
     }
 
     @Override
-    public void write(String path, String body) {
+    public void write(String path, byte[] body) {
         var directoryForFiles = Paths.get(root.toString(), path);
         try {
-            Files.writeString(directoryForFiles, body);
+            Files.write(directoryForFiles, body);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
