@@ -11,6 +11,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
@@ -107,20 +108,6 @@ public class MiddlewareTest {
         var outputStream = new ByteArrayOutputStream();
         response.write(outputStream);
         assertEquals("HTTP/1.1 404 Not Found\r\n\r\n", outputStream.toString());
-    }
-
-    //@Test()
-    public void respond_with_with_the_compressed_body() throws IOException {
-        var middleware = Middleware.link(
-                new CompressionMiddleware(),
-                new RootMiddleware(),
-                new EchoMiddleware()
-        );
-        var request = createRequest("GET /echo/abc HTTP/1.1\r\nHost: localhost:4221\r\nUser-Agent: curl/7.64.1\r\nAccept: */*\r\nAccept-Encoding: gzip\r\n\r\n");
-        var response = middleware.handle(request);
-        var outputStream = new ByteArrayOutputStream();
-        response.write(outputStream);
-        assertEquals("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 20\r\nContent-Encoding: gzip\r\n\r\n1f8b08000000000000ff03000000000000000000", outputStream.toString());
     }
 
     private HttpRequest createRequest(String content) {
